@@ -95,11 +95,24 @@ class CardOCR:
             # Read and preprocess image
             image = self._preprocess_image(image_path)
             
-            # Perform OCR
+            # Perform OCR with optimized parameters for business cards
             results = self.reader.readtext(
                 image,
                 detail=detail,
-                paragraph=paragraph
+                paragraph=paragraph,
+                min_size=10,           # Minimum text size
+                text_threshold=0.6,    # Lower threshold for text detection
+                low_text=0.3,          # Lower bound for text detection
+                link_threshold=0.3,    # Link adjacent text
+                canvas_size=2560,      # Larger canvas for better detection
+                mag_ratio=1.5,         # Magnification ratio
+                slope_ths=0.2,         # Slope threshold for text lines
+                ycenter_ths=0.5,       # Y-center threshold
+                height_ths=0.5,        # Height threshold
+                width_ths=0.5,         # Width threshold
+                add_margin=0.1,        # Add margin around detected text
+                contrast_ths=0.1,      # Contrast threshold
+                adjust_contrast=0.5    # Contrast adjustment
             )
             
             # Parse results based on detail level
@@ -192,10 +205,11 @@ class CardOCR:
             if image.mode != "RGB":
                 image = image.convert("RGB")
             
-            # Resize if too small (EasyOCR works better with larger images)
-            min_dimension = 800
+            # Get original dimensions
             width, height = image.size
             
+            # Resize if too small (EasyOCR works better with larger images)
+            min_dimension = 1000
             if width < min_dimension or height < min_dimension:
                 scale = max(min_dimension / width, min_dimension / height)
                 new_size = (int(width * scale), int(height * scale))
@@ -203,7 +217,40 @@ class CardOCR:
                 logger.debug(f"Resized image from {width}x{height} to {new_size}")
             
             # Convert to numpy array
-            return np.array(image)
+            img_array = np.array(image)
+            
+            # Try to enhance the image using OpenCV if available
+            try:
+                import cv2
+                
+                # Convert to grayscale
+                gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
+                
+                # Apply adaptive thresholding for better text detection
+                # This helps with varying lighting conditions
+                denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
+                
+                # Increase contrast using CLAHE
+                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+                enhanced = clahe.apply(denoised)
+                
+                # Apply slight sharpening
+                kernel = np.array([[-1, -1, -1],
+                                   [-1,  9, -1],
+                                   [-1, -1, -1]])
+                sharpened = cv2.filter2D(enhanced, -1, kernel)
+                
+                # Convert back to RGB for EasyOCR
+                img_array = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2RGB)
+                
+                logger.debug("Applied image enhancement with OpenCV")
+                
+            except ImportError:
+                logger.debug("OpenCV not available, using raw image")
+            except Exception as e:
+                logger.debug(f"Image enhancement failed, using raw image: {e}")
+            
+            return img_array
             
         except Exception as e:
             logger.error(f"Image preprocessing failed: {str(e)}")

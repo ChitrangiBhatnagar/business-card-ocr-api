@@ -70,7 +70,21 @@ def create_app(config_name: str = None) -> Flask:
             "documentation": "https://github.com/your-repo/business-card-api"
         })
     
+    # Favicon handler (prevents 404 errors from browsers)
+    @app.route("/favicon.ico")
+    def favicon():
+        """Return empty response for favicon requests."""
+        return "", 204
+    
     # Global error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors."""
+        return jsonify({
+            "success": False,
+            "error": "Not found"
+        }), 404
+    
     @app.errorhandler(413)
     def request_entity_too_large(error):
         """Handle file too large errors."""
@@ -79,9 +93,21 @@ def create_app(config_name: str = None) -> Flask:
             "error": f"File too large. Maximum size: {Config.MAX_CONTENT_LENGTH // (1024*1024)}MB"
         }), 413
     
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle 500 errors."""
+        logger.error(f"Internal error: {str(error)}")
+        return jsonify({
+            "success": False,
+            "error": "Internal server error"
+        }), 500
+    
     @app.errorhandler(Exception)
     def handle_exception(error):
         """Handle uncaught exceptions."""
+        # Don't log 404 errors as they're handled above
+        if hasattr(error, 'code') and error.code == 404:
+            return not_found(error)
         logger.error(f"Uncaught exception: {str(error)}", exc_info=True)
         return jsonify({
             "success": False,

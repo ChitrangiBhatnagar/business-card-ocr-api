@@ -1,32 +1,34 @@
 # Business Card Processing API - Dependencies
-# Python 3.8+ required
+# All free, no paid APIs required
 
 # Web Framework
-Flask==2.3.3
-Werkzeug==2.3.7
-flask-cors==4.0.0
+Flask>=2.3.0
+Werkzeug>=2.3.0
+flask-cors>=4.0.0
 
-# OCR Engine
-easyocr==1.7.1
-Pillow==10.1.0
+# OCR Engine (Free, local processing)
+easyocr>=1.7.0
+
+# Image Processing
+Pillow>=10.4.0
+opencv-python-headless>=4.8.0
 
 # Data Processing
-pandas==2.0.3
-numpy==1.24.3
+pandas>=2.0.0
+numpy>=1.24.0
+
+# HTTP Requests (for free API enrichment)
+requests>=2.31.0
 
 # Environment & Configuration
-python-dotenv==1.0.0
+python-dotenv>=1.0.0
 
-# HTTP Requests (for API enrichment)
-requests==2.31.0
-urllib3==2.0.7
+# Utilities
+phonenumbers>=8.13.0
 
-# Validation
-email-validator==2.1.0
+# Testing (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
 
-# Testing
-pytest==7.4.3
-pytest-cov==4.1.0
-
-# Development
-python-dateutil==2.8.2
+# Production Server (optional)
+gunicorn>=21.0.0
