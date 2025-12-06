@@ -5,6 +5,7 @@
 Flask>=2.3.0
 Werkzeug>=2.3.0
 flask-cors>=4.0.0
+gunicorn>=21.0.0
 
 # OCR Engine (Free, local processing)
 easyocr>=1.7.0

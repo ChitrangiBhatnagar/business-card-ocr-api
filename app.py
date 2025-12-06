@@ -8,7 +8,7 @@ from business card images using OCR.
 import logging
 import os
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
 
 from config import Config, get_config
@@ -49,10 +49,16 @@ def create_app(config_name: str = None) -> Flask:
     # Register blueprints
     app.register_blueprint(api_bp)
     
-    # Root endpoint
+    # Root endpoint - Serve the UI
     @app.route("/")
     def index():
-        """Root endpoint with API information."""
+        """Serve the main UI page."""
+        return render_template("index.html")
+    
+    # API info endpoint
+    @app.route("/api/info")
+    def api_info():
+        """API information endpoint."""
         return jsonify({
             "name": "Business Card Processing API",
             "version": "1.0.0",
@@ -67,7 +73,7 @@ def create_app(config_name: str = None) -> Flask:
                 "download": "GET /api/download/<filename>",
                 "list_files": "GET /api/files"
             },
-            "documentation": "https://github.com/your-repo/business-card-api"
+            "documentation": "https://github.com/ChitrangiBhatnagar/business-card-ocr-api"
         })
     
     # Favicon handler (prevents 404 errors from browsers)
