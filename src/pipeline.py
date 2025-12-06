@@ -14,6 +14,7 @@ import uuid
 import pandas as pd
 
 from .ocr import CardOCR
+from config import Config
 from .parser import CardDataParser, ContactData
 from .researcher import FreeLeadResearcher, EnrichedData
 
@@ -62,9 +63,21 @@ class CardResearchPipeline:
             github_token: GitHub token
         """
         # Initialize components
+        # Read performance settings from Config when not provided
+        max_dim = Config.OCR_MAX_DIMENSION
+        enhance = Config.OCR_ENHANCE_IMAGES
+        canvas = Config.OCR_CANVAS_SIZE
+        mag_ratio = Config.OCR_MAG_RATIO
+        min_size = Config.OCR_MIN_SIZE
+
         self.ocr = ocr or CardOCR(
             languages=ocr_languages,
-            gpu=ocr_gpu
+            gpu=ocr_gpu,
+            max_dimension=max_dim,
+            enhance_images=enhance,
+            canvas_size=canvas,
+            mag_ratio=mag_ratio,
+            min_size=min_size
         )
         self.parser = parser or CardDataParser()
         self.researcher = researcher or FreeLeadResearcher(
@@ -176,11 +189,31 @@ class CardResearchPipeline:
         
         start_time = datetime.now()
         
-        for i, image_path in enumerate(image_paths):
-            logger.info(f"Processing image {i + 1}/{len(image_paths)}")
-            
-            result = self.process_image(image_path, enrich=enrich)
-            batch_result["results"].append(result)
+        # Optionally process in parallel for speed. Uses ThreadPoolExecutor which
+        # shares the same EasyOCR reader instance and avoids reloading the model
+        # per worker. This is a good trade-off between memory usage and speed.
+        if Config.PARALLEL_PROCESSING:
+            import concurrent.futures
+            max_workers = max(1, Config.PARALLEL_WORKERS)
+            logger.info(f"Processing batch in parallel with {max_workers} workers")
+            with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+                futures = [executor.submit(self.process_image, p, enrich) for p in image_paths]
+                for i, future in enumerate(concurrent.futures.as_completed(futures)):
+                    try:
+                        result = future.result()
+                    except Exception as e:
+                        logger.error(f"Image {i+1} processing failed: {e}")
+                        result = {
+                            "success": False,
+                            "image_path": str(image_paths[i]),
+                            "error": str(e)
+                        }
+                    batch_result["results"].append(result)
+        else:
+            for i, image_path in enumerate(image_paths):
+                logger.info(f"Processing image {i + 1}/{len(image_paths)}")
+                result = self.process_image(image_path, enrich=enrich)
+                batch_result["results"].append(result)
             
             if result["success"]:
                 batch_result["processed"] += 1

@@ -30,7 +30,12 @@ class CardOCR:
     def __init__(
         self, 
         languages: Optional[List[str]] = None, 
-        gpu: bool = False
+        gpu: bool = False,
+        max_dimension: int = 1600,
+        enhance_images: bool = False,
+        canvas_size: int = 1280,
+        mag_ratio: float = 1.0,
+        min_size: int = 10
     ) -> None:
         """Initialize the CardOCR with EasyOCR reader.
         
@@ -41,6 +46,12 @@ class CardOCR:
         self.languages = languages or ["en"]
         self.gpu = gpu
         self._reader: Optional[easyocr.Reader] = None
+        # Performance/tuning parameters
+        self.max_dimension = max_dimension
+        self.enhance_images = enhance_images
+        self.canvas_size = canvas_size
+        self.mag_ratio = mag_ratio
+        self.min_size = min_size
         
         logger.info(
             f"CardOCR initialized with languages={self.languages}, gpu={self.gpu}"
@@ -100,12 +111,12 @@ class CardOCR:
                 image,
                 detail=detail,
                 paragraph=paragraph,
-                min_size=10,           # Minimum text size
+                min_size=self.min_size,           # Minimum text size
                 text_threshold=0.6,    # Lower threshold for text detection
                 low_text=0.3,          # Lower bound for text detection
                 link_threshold=0.3,    # Link adjacent text
-                canvas_size=2560,      # Larger canvas for better detection
-                mag_ratio=1.5,         # Magnification ratio
+                canvas_size=self.canvas_size,      # Canvas for detection
+                mag_ratio=self.mag_ratio,         # Magnification ratio
                 slope_ths=0.2,         # Slope threshold for text lines
                 ycenter_ths=0.5,       # Y-center threshold
                 height_ths=0.5,        # Height threshold
@@ -208,19 +219,20 @@ class CardOCR:
             # Get original dimensions
             width, height = image.size
             
-            # Resize if too small (EasyOCR works better with larger images)
-            min_dimension = 1000
-            if width < min_dimension or height < min_dimension:
-                scale = max(min_dimension / width, min_dimension / height)
+            # Downscale large images to a maximum dimension to reduce processing time
+            if self.max_dimension and (width > self.max_dimension or height > self.max_dimension):
+                scale = min(self.max_dimension / width, self.max_dimension / height)
                 new_size = (int(width * scale), int(height * scale))
                 image = image.resize(new_size, Image.Resampling.LANCZOS)
-                logger.debug(f"Resized image from {width}x{height} to {new_size}")
+                logger.debug(f"Downscaled image from {width}x{height} to {new_size}")
             
             # Convert to numpy array
             img_array = np.array(image)
             
-            # Try to enhance the image using OpenCV if available
+            # Try to enhance the image using OpenCV if available and enhancement is enabled
             try:
+                if not self.enhance_images:
+                    raise ImportError("Image enhancement disabled")
                 import cv2
                 
                 # Convert to grayscale
