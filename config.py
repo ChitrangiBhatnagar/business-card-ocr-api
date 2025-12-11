@@ -43,11 +43,12 @@ class Config:
     OCR_LANGUAGES: list = ["en"]  # EasyOCR language codes
     OCR_GPU: bool = os.getenv("CARD_API_OCR_GPU", "False").lower() == "true"
     # Performance and tuning
-    OCR_MAX_DIMENSION: int = int(os.getenv("CARD_API_OCR_MAX_DIMENSION", "1600"))
-    OCR_ENHANCE_IMAGES: bool = os.getenv("CARD_API_OCR_ENHANCE_IMAGES", "False").lower() == "true"
-    OCR_CANVAS_SIZE: int = int(os.getenv("CARD_API_OCR_CANVAS_SIZE", "1280"))
-    OCR_MAG_RATIO: float = float(os.getenv("CARD_API_OCR_MAG_RATIO", "1.0"))
-    OCR_MIN_SIZE: int = int(os.getenv("CARD_API_OCR_MIN_SIZE", "10"))
+    OCR_MAX_DIMENSION: int = int(os.getenv("CARD_API_OCR_MAX_DIMENSION", "2000"))
+    OCR_ENHANCE_IMAGES: bool = os.getenv("CARD_API_OCR_ENHANCE_IMAGES", "True").lower() == "true"
+    OCR_CANVAS_SIZE: int = int(os.getenv("CARD_API_OCR_CANVAS_SIZE", "1600"))
+    OCR_MAG_RATIO: float = float(os.getenv("CARD_API_OCR_MAG_RATIO", "1.5"))
+    OCR_MIN_SIZE: int = int(os.getenv("CARD_API_OCR_MIN_SIZE", "5"))
+    OCR_GPU: bool = os.getenv("CARD_API_OCR_GPU", "True").lower() == "true"
     # Batch processing
     PARALLEL_PROCESSING: bool = os.getenv("CARD_API_PARALLEL_PROCESSING", "False").lower() == "true"
     PARALLEL_WORKERS: int = int(os.getenv("CARD_API_PARALLEL_WORKERS", "2"))

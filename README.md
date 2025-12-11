@@ -161,7 +161,30 @@ curl -X POST http://localhost:5000/api/enrich \
 }
 ```
 
-## Configuration
+
+## Advanced OCR Accuracy & Preprocessing
+
+### Maximum Accuracy Settings
+
+To maximize OCR accuracy, set these environment variables in your `.env` or Render/Cloud dashboard:
+
+```
+CARD_API_OCR_ENHANCE_IMAGES=True
+CARD_API_OCR_CANVAS_SIZE=1600
+CARD_API_OCR_MAG_RATIO=1.5
+CARD_API_OCR_MIN_SIZE=5
+CARD_API_OCR_MAX_DIMENSION=2000
+CARD_API_OCR_GPU=True
+```
+
+### Advanced Preprocessing Features
+
+- **Auto-rotation**: Images are rotated using EXIF metadata for correct orientation.
+- **Shadow removal**: Morphological closing and normalization remove shadows.
+- **Background cropping**: Crops to the largest contour (the card itself).
+- **Denoising, contrast, sharpening**: OpenCV routines improve text clarity.
+
+These steps are enabled by default for best results. You can disable enhancement by setting `CARD_API_OCR_ENHANCE_IMAGES=False`.
 
 ### Environment Variables
 
@@ -170,7 +193,12 @@ curl -X POST http://localhost:5000/api/enrich \
 | `CARD_API_ENV` | Environment (development/production) | development |
 | `CARD_API_DEBUG` | Enable debug mode | True |
 | `CARD_API_SECRET_KEY` | Flask secret key | dev-secret-key |
-| `CARD_API_OCR_GPU` | Use GPU for OCR | False |
+| `CARD_API_OCR_GPU` | Use GPU for OCR | True |
+| `CARD_API_OCR_ENHANCE_IMAGES` | Enable advanced preprocessing | True |
+| `CARD_API_OCR_CANVAS_SIZE` | EasyOCR canvas size | 1600 |
+| `CARD_API_OCR_MAG_RATIO` | EasyOCR magnification ratio | 1.5 |
+| `CARD_API_OCR_MIN_SIZE` | Minimum text size for OCR | 5 |
+| `CARD_API_OCR_MAX_DIMENSION` | Max image dimension for OCR | 2000 |
 | `HUNTER_API_KEY` | Hunter.io API key | None |
 | `ABSTRACT_API_KEY` | Abstract API key | None |
 | `GITHUB_TOKEN` | GitHub token | None |

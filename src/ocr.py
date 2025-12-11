@@ -197,73 +197,94 @@ class CardOCR:
             raise
     
     def _preprocess_image(
-        self, 
+        self,
         image_path: Union[str, Path]
     ) -> np.ndarray:
-        """Preprocess image for better OCR results.
-        
-        Args:
-            image_path: Path to the image file
-            
-        Returns:
-            Preprocessed image as numpy array
-        """
+        """Advanced preprocessing for better OCR accuracy: auto-rotation, shadow removal, background cropping, enhancement."""
         try:
             # Open image with PIL
             image = Image.open(image_path)
-            
             # Convert to RGB if necessary
             if image.mode != "RGB":
                 image = image.convert("RGB")
-            
-            # Get original dimensions
+
+            # Auto-rotate using EXIF
+            try:
+                exif = image._getexif()
+                if exif is not None:
+                    orientation = exif.get(274)
+                    if orientation == 3:
+                        image = image.rotate(180, expand=True)
+                    elif orientation == 6:
+                        image = image.rotate(270, expand=True)
+                    elif orientation == 8:
+                        image = image.rotate(90, expand=True)
+            except Exception:
+                pass
+
+            # Downscale large images to a maximum dimension
             width, height = image.size
-            
-            # Downscale large images to a maximum dimension to reduce processing time
             if self.max_dimension and (width > self.max_dimension or height > self.max_dimension):
                 scale = min(self.max_dimension / width, self.max_dimension / height)
                 new_size = (int(width * scale), int(height * scale))
                 image = image.resize(new_size, Image.Resampling.LANCZOS)
                 logger.debug(f"Downscaled image from {width}x{height} to {new_size}")
-            
+
             # Convert to numpy array
             img_array = np.array(image)
-            
-            # Try to enhance the image using OpenCV if available and enhancement is enabled
+
+            # Advanced preprocessing with OpenCV
             try:
                 if not self.enhance_images:
                     raise ImportError("Image enhancement disabled")
                 import cv2
-                
+
                 # Convert to grayscale
                 gray = cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY)
-                
-                # Apply adaptive thresholding for better text detection
-                # This helps with varying lighting conditions
-                denoised = cv2.fastNlMeansDenoising(gray, None, 10, 7, 21)
-                
-                # Increase contrast using CLAHE
+
+                # Shadow removal (morphological closing)
+                kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15))
+                bg = cv2.morphologyEx(gray, cv2.MORPH_CLOSE, kernel)
+                diff = 255 - cv2.absdiff(gray, bg)
+                norm = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
+
+                # Adaptive thresholding for binarization
+                bin_img = cv2.adaptiveThreshold(norm, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                                cv2.THRESH_BINARY, 35, 11)
+
+                # Find contours and crop to largest contour (assume card is largest object)
+                contours, _ = cv2.findContours(bin_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if contours:
+                    largest = max(contours, key=cv2.contourArea)
+                    x, y, w, h = cv2.boundingRect(largest)
+                    crop_img = img_array[y:y+h, x:x+w]
+                    img_array = crop_img
+                    logger.debug(f"Cropped to largest contour: {x},{y},{w},{h}")
+
+                # Denoising
+                denoised = cv2.fastNlMeansDenoising(cv2.cvtColor(img_array, cv2.COLOR_RGB2GRAY), None, 10, 7, 21)
+
+                # Contrast enhancement
                 clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
                 enhanced = clahe.apply(denoised)
-                
-                # Apply slight sharpening
+
+                # Sharpening
                 kernel = np.array([[-1, -1, -1],
                                    [-1,  9, -1],
                                    [-1, -1, -1]])
                 sharpened = cv2.filter2D(enhanced, -1, kernel)
-                
+
                 # Convert back to RGB for EasyOCR
                 img_array = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2RGB)
-                
-                logger.debug("Applied image enhancement with OpenCV")
-                
+                logger.debug("Applied advanced image enhancement with OpenCV")
+
             except ImportError:
                 logger.debug("OpenCV not available, using raw image")
             except Exception as e:
-                logger.debug(f"Image enhancement failed, using raw image: {e}")
-            
+                logger.debug(f"Advanced image enhancement failed, using raw image: {e}")
+
             return img_array
-            
+
         except Exception as e:
             logger.error(f"Image preprocessing failed: {str(e)}")
             raise ValueError(f"Failed to preprocess image: {str(e)}")
