@@ -14,7 +14,7 @@ git push origin main
 On Render.com Dashboard:
 1. Go to your service settings
 2. Add Environment Variable:
-   - `GOOGLE_API_KEY` = `AIzaSyA_ofdyFQXng4jLWsSYNv099ECHd2qrSK8`
+   - `GOOGLE_API_KEY` = `your-google-api-key-here` (get from https://console.cloud.google.com/apis/credentials)
 3. Deploy
 
 Your API URL: `https://business-card-ocr-api.onrender.com`
