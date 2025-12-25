@@ -13,6 +13,7 @@ from flask import Blueprint, request, jsonify, send_file, current_app
 from werkzeug.utils import secure_filename
 
 from src.pipeline import CardResearchPipeline
+from src.batch_processor import batch_processor
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -39,9 +40,12 @@ def get_pipeline() -> CardResearchPipeline:
             ocr_gpu=Config.OCR_GPU,
             hunter_api_key=Config.HUNTER_API_KEY,
             abstract_api_key=Config.ABSTRACT_API_KEY,
-            github_token=Config.GITHUB_TOKEN
+            github_token=Config.GITHUB_TOKEN,
+            gemini_api_key=Config.GOOGLE_API_KEY,
+            use_gemini_fallback=Config.USE_GEMINI_FALLBACK,
+            gemini_model=Config.GEMINI_MODEL
         )
-        logger.info("Pipeline initialized")
+        logger.info("Pipeline initialized with Gemini fallback: " + str(Config.USE_GEMINI_FALLBACK and Config.GOOGLE_API_KEY is not None))
     
     return _pipeline
 
@@ -108,6 +112,8 @@ def process_single():
     Expects:
         - multipart/form-data with 'file' field
         - Optional query param: enrich=true/false (default: true)
+        - Optional query param: force_gemini=true/false (default: false) - Use Gemini directly for best accuracy
+        - Optional query param: ocr_method=auto/easyocr/gemini (default: auto)
     
     Returns:
         JSON with extracted contact data
@@ -133,8 +139,14 @@ def process_single():
             "error": f"File type not allowed. Allowed: {', '.join(Config.ALLOWED_EXTENSIONS)}"
         }), 400
     
-    # Get enrichment option
+    # Get options
     enrich = request.args.get("enrich", "true").lower() == "true"
+    force_gemini = request.args.get("force_gemini", "false").lower() == "true"
+    ocr_method = request.args.get("ocr_method", "auto").lower()
+    
+    # ocr_method=gemini is equivalent to force_gemini=true
+    if ocr_method == "gemini":
+        force_gemini = True
     
     try:
         # Save uploaded file
@@ -142,11 +154,11 @@ def process_single():
         upload_path = Path(Config.UPLOAD_FOLDER) / filename
         file.save(str(upload_path))
         
-        logger.info(f"Processing uploaded file: {filename}")
+        logger.info(f"Processing uploaded file: {filename} (force_gemini={force_gemini})")
         
         # Process image
         pipeline = get_pipeline()
-        result = pipeline.process_image(upload_path, enrich=enrich)
+        result = pipeline.process_image(upload_path, enrich=enrich, force_gemini=force_gemini)
         
         # Clean up uploaded file
         try:
@@ -154,16 +166,8 @@ def process_single():
         except Exception as e:
             logger.warning(f"Failed to clean up file: {str(e)}")
         
-        if result["success"]:
-            return jsonify({
-                "success": True,
-                "data": result
-            }), 200
-        else:
-            return jsonify({
-                "success": False,
-                "error": result["error"]
-            }), 500
+        return jsonify(result), 200 if result.get("success") else 500
+
             
     except Exception as e:
         logger.error(f"Error processing file: {str(e)}")
@@ -175,75 +179,254 @@ def process_single():
 
 @api_bp.route("/batch", methods=["POST"])
 def process_batch():
-    """Process multiple business card images.
+    """Enhanced progressive batch processing.
     
-    Expects:
-        - multipart/form-data with multiple 'files' fields
-        - Optional query params:
-            - enrich=true/false (default: true)
-            - generate_csv=true/false (default: true)
-    
-    Returns:
-        JSON with batch processing results
+    Processes files in chunks and returns results progressively.
+    For large batches (>10 files), automatically uses progressive processing.
     """
     if "files" not in request.files:
         return jsonify({
             "success": False,
-            "error": "No files provided. Use 'files' field in form-data."
+            "error": "No files provided"
         }), 400
-    
+
     files = request.files.getlist("files")
-    
-    if not files or all(f.filename == "" for f in files):
-        return jsonify({
-            "success": False,
-            "error": "No files selected"
-        }), 400
-    
-    # Get options
-    enrich = request.args.get("enrich", "true").lower() == "true"
-    generate_csv = request.args.get("generate_csv", "true").lower() == "true"
-    
+    enrich = request.args.get("enrich", "false").lower() == "true"  # Default to false for speed
+    force_gemini = request.args.get("force_gemini", "false").lower() == "true"
+
     try:
-        # Save all uploaded files
         saved_paths = []
+
         for file in files:
             if file.filename and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                upload_path = Path(Config.UPLOAD_FOLDER) / filename
-                file.save(str(upload_path))
-                saved_paths.append(upload_path)
-        
+                path = Path(Config.UPLOAD_FOLDER) / filename
+                file.save(str(path))
+                saved_paths.append(path)
+
         if not saved_paths:
             return jsonify({
                 "success": False,
                 "error": "No valid files to process"
             }), 400
-        
-        logger.info(f"Processing batch of {len(saved_paths)} files")
-        
-        # Process batch
+
         pipeline = get_pipeline()
-        result = pipeline.process_batch(
-            saved_paths,
-            enrich=enrich,
-            generate_csv=generate_csv
-        )
         
-        # Clean up uploaded files
-        for path in saved_paths:
-            try:
-                os.remove(path)
-            except Exception as e:
-                logger.warning(f"Failed to clean up file: {str(e)}")
+        # For small batches, process normally
+        if len(saved_paths) <= 10:
+            results = []
+            for i, image_path in enumerate(saved_paths):
+                try:
+                    result = pipeline.process_image(image_path, enrich=enrich, force_gemini=force_gemini)
+                    results.append(result)
+                    logger.info(f"Processed {i+1}/{len(saved_paths)}: {image_path.name}")
+                except Exception as e:
+                    logger.error(f"Error processing {image_path}: {e}")
+                    results.append({
+                        "success": False,
+                        "error": str(e),
+                        "image": str(image_path)
+                    })
+            
+            # Clean up files
+            for p in saved_paths:
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+            
+            successful = sum(1 for r in results if r.get("success"))
+            
+            return jsonify({
+                "success": True,
+                "results": results,
+                "total": len(results),
+                "successful": successful,
+                "failed": len(results) - successful
+            }), 200
+        
+        # For large batches, use progressive processing automatically
+        else:
+            # Start progressive job
+            job_id = batch_processor.start_batch_job(saved_paths)
+            all_results = []
+            
+            # Process all batches immediately but with progress tracking
+            while True:
+                batch_result = batch_processor.process_next_batch(job_id, pipeline)
+                if batch_result is None:
+                    break
+                    
+                # Add batch results to total
+                for item in batch_result['batch_results']:
+                    all_results.append(item['result'])
+                
+                logger.info(f"Completed batch {batch_result['batch_number']}/{batch_result['total_batches']} "
+                           f"({batch_result['progress']:.1f}% complete)")
+            
+            # Clean up files and job
+            for p in saved_paths:
+                try:
+                    os.remove(p)
+                except Exception:
+                    pass
+            
+            batch_processor.cleanup_job(job_id)
+            
+            successful = sum(1 for r in all_results if r.get("success"))
+            
+            return jsonify({
+                "success": True,
+                "results": all_results,
+                "total": len(all_results),
+                "successful": successful,
+                "failed": len(all_results) - successful,
+                "processing_method": "progressive_batch"
+            }), 200
+
+    except Exception as e:
+        logger.exception("Unhandled error in /batch")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_bp.route("/batch-progressive/start", methods=["POST"])
+def start_progressive_batch():
+    """Start a progressive batch processing job.
+    
+    Expects:
+        - multipart/form-data with 'files' field (multiple files)
+        - Optional query param: batch_size=20 (default: 20)
+    
+    Returns:
+        JSON with job_id for tracking progress
+    """
+    if "files" not in request.files:
+        return jsonify({
+            "success": False,
+            "error": "No files provided"
+        }), 400
+
+    files = request.files.getlist("files")
+    batch_size = int(request.args.get("batch_size", "20"))
+
+    try:
+        saved_paths = []
+
+        for file in files:
+            if file.filename and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                path = Path(Config.UPLOAD_FOLDER) / filename
+                file.save(str(path))
+                saved_paths.append(path)
+
+        if not saved_paths:
+            return jsonify({
+                "success": False,
+                "error": "No valid files to process"
+            }), 400
+
+        # Start batch job
+        batch_processor.batch_size = batch_size
+        job_id = batch_processor.start_batch_job(saved_paths)
         
         return jsonify({
-            "success": result["success"],
-            "data": result
-        }), 200 if result["success"] else 500
-        
+            "success": True,
+            "job_id": job_id,
+            "total_files": len(saved_paths),
+            "batch_size": batch_size,
+            "estimated_batches": len(saved_paths) // batch_size + (1 if len(saved_paths) % batch_size else 0)
+        }), 200
+
     except Exception as e:
-        logger.error(f"Error processing batch: {str(e)}")
+        logger.error(f"Error starting batch job: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_bp.route("/batch-progressive/<job_id>/next", methods=["POST"])
+def process_next_batch(job_id: str):
+    """Process the next batch for a job.
+    
+    Args:
+        job_id: Job ID from start_progressive_batch
+    
+    Returns:
+        JSON with batch results and progress
+    """
+    try:
+        pipeline = get_pipeline()
+        result = batch_processor.process_next_batch(job_id, pipeline)
+        
+        if result is None:
+            # Job not found or already complete
+            job_status = batch_processor.get_job_status(job_id)
+            if job_status is None:
+                return jsonify({
+                    "success": False,
+                    "error": "Job not found"
+                }), 404
+            else:
+                return jsonify({
+                    "success": True,
+                    "job_id": job_id,
+                    "status": "completed",
+                    "is_complete": True,
+                    "final_results": job_status.get('results', [])
+                }), 200
+        
+        return jsonify({
+            "success": True,
+            **result
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error processing batch {job_id}: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@api_bp.route("/batch-progressive/<job_id>/status", methods=["GET"])
+def get_batch_status(job_id: str):
+    """Get status of a batch processing job.
+    
+    Args:
+        job_id: Job ID
+    
+    Returns:
+        JSON with current job status
+    """
+    try:
+        job_status = batch_processor.get_job_status(job_id)
+        
+        if job_status is None:
+            return jsonify({
+                "success": False,
+                "error": "Job not found"
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "job_id": job_id,
+            "status": job_status['status'],
+            "progress": (job_status['processed'] / job_status['total_images']) * 100,
+            "processed": job_status['processed'],
+            "successful": job_status['successful'],
+            "failed": job_status['failed'],
+            "total": job_status['total_images'],
+            "current_batch": job_status['current_batch'],
+            "total_batches": job_status['total_batches'],
+            "is_complete": job_status['current_batch'] >= job_status['total_batches']
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Error getting batch status {job_id}: {str(e)}")
         return jsonify({
             "success": False,
             "error": str(e)

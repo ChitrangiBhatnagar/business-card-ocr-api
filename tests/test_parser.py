@@ -1,20 +1,20 @@
 """
-Tests for CardDataParser class.
+Tests for ContactParser class.
 
 Tests the parsing of OCR text into structured contact data.
 """
 
 import pytest
-from src.parser import CardDataParser, ContactData
+from src.parser import ContactParser, ContactData
 
 
-class TestCardDataParser:
-    """Test cases for CardDataParser."""
+class TestContactParser:
+    """Test cases for ContactParser."""
     
     @pytest.fixture
     def parser(self):
         """Create parser instance."""
-        return CardDataParser()
+        return ContactParser()
     
     def test_parser_initialization(self, parser):
         """Test parser initializes correctly."""

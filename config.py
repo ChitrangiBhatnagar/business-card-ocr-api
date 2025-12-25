@@ -58,6 +58,12 @@ class Config:
     ABSTRACT_API_KEY: Optional[str] = os.getenv("ABSTRACT_API_KEY")
     GITHUB_TOKEN: Optional[str] = os.getenv("GITHUB_TOKEN")
     
+    # Gemini API (for high-accuracy OCR fallback - nearly free: $0.0001/card)
+    GOOGLE_API_KEY: Optional[str] = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")  
+    USE_GEMINI_FALLBACK: bool = os.getenv("USE_GEMINI_FALLBACK", "True").lower() == "true"
+    GEMINI_FALLBACK_THRESHOLD: float = float(os.getenv("GEMINI_FALLBACK_THRESHOLD", "0.6"))
+    
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = int(os.getenv("CARD_API_RATE_LIMIT", "60"))
     
@@ -109,7 +115,10 @@ class Config:
         return {
             "hunter_api": cls.HUNTER_API_KEY is not None,
             "abstract_api": cls.ABSTRACT_API_KEY is not None,
-            "github_api": cls.GITHUB_TOKEN is not None
+            "github_api": cls.GITHUB_TOKEN is not None,
+            "gemini_api": cls.GOOGLE_API_KEY is not None,
+            "gemini_model": cls.GEMINI_MODEL,
+            "gemini_fallback_enabled": cls.USE_GEMINI_FALLBACK and cls.GOOGLE_API_KEY is not None
         }
 
 

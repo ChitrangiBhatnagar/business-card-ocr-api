@@ -52,7 +52,7 @@ class EnrichedData:
         }
 
 
-class FreeLeadResearcher:
+class ContactResearcher:
     """Enriches contact data using free API tiers.
     
     Supported APIs:
@@ -77,7 +77,7 @@ class FreeLeadResearcher:
         abstract_api_key: Optional[str] = None,
         github_token: Optional[str] = None
     ) -> None:
-        """Initialize the FreeLeadResearcher.
+        """Initialize the ContactResearcher.
         
         Args:
             hunter_api_key: Hunter.io API key (optional)
@@ -104,7 +104,7 @@ class FreeLeadResearcher:
             available_apis.append("GitHub")
         
         logger.info(
-            f"FreeLeadResearcher initialized with APIs: "
+            f"ContactResearcher initialized with APIs: "
             f"{', '.join(available_apis) if available_apis else 'None'}"
         )
     

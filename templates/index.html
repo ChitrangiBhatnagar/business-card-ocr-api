@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-         :root {
+        :root {
             --primary-blue: #0066FF;
             --primary-blue-hover: #0052CC;
             --primary-blue-light: #3385FF;
@@ -22,19 +22,19 @@
             --danger-color: #ff4d4d;
             --warning-color: #ffaa00;
         }
-        
+
         * {
             box-sizing: border-box;
         }
-        
+
         body {
             background: var(--dark-bg);
             min-height: 100vh;
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
             color: var(--text-primary);
         }
+
         /* Animated gradient background */
-        
         body::before {
             content: '';
             position: fixed;
@@ -42,22 +42,157 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(ellipse at 20% 20%, rgba(0, 102, 255, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(0, 102, 255, 0.1) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(0, 50, 120, 0.05) 0%, transparent 70%);
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(0, 102, 255, 0.2) 0%, transparent 50%), 
+                radial-gradient(ellipse at 80% 80%, rgba(0, 102, 255, 0.15) 0%, transparent 50%), 
+                radial-gradient(ellipse at 50% 50%, rgba(0, 50, 120, 0.08) 0%, transparent 70%);
             pointer-events: none;
             z-index: -1;
+            animation: gradientShift 10s ease-in-out infinite alternate;
         }
-        
+
+        @keyframes gradientShift {
+            0% { 
+                background: 
+                    radial-gradient(ellipse at 20% 20%, rgba(0, 102, 255, 0.2) 0%, transparent 50%), 
+                    radial-gradient(ellipse at 80% 80%, rgba(0, 102, 255, 0.15) 0%, transparent 50%); 
+            }
+            100% { 
+                background: 
+                    radial-gradient(ellipse at 80% 20%, rgba(0, 102, 255, 0.25) 0%, transparent 50%), 
+                    radial-gradient(ellipse at 20% 80%, rgba(0, 102, 255, 0.18) 0%, transparent 50%); 
+            }
+        }
+
+        /* Floating particles animation */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 50%;
+            animation: floatUp 15s infinite linear;
+        }
+
+        /* Animated starfield */
+        .starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Animated geometric shapes */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.05;
+            animation: floatShapes 20s infinite linear;
+        }
+
+        .shape.triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-bottom: 25px solid var(--primary-blue);
+        }
+
+        .shape.square {
+            width: 20px;
+            height: 20px;
+            background: var(--primary-blue);
+            transform: rotate(45deg);
+        }
+
+        .shape.circle {
+            width: 25px;
+            height: 25px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+        }
+
+        @keyframes floatShapes {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.05;
+            }
+            90% {
+                opacity: 0.05;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes floatUp {
+            0% { 
+                transform: translateY(100vh) scale(0) rotate(0deg); 
+                opacity: 0; 
+            }
+            10% { 
+                opacity: 1; 
+                transform: translateY(90vh) scale(1) rotate(45deg); 
+            }
+            90% { 
+                opacity: 1; 
+                transform: translateY(10vh) scale(1) rotate(315deg); 
+            }
+            100% { 
+                transform: translateY(-10vh) scale(0) rotate(360deg); 
+                opacity: 0; 
+            }
+        }
+
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 1.5rem;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 1.5rem;
         }
-        
+
         .header h1 {
             font-weight: 700;
             font-size: 2rem;
@@ -67,94 +202,195 @@
             background-clip: text;
             margin-bottom: 0.5rem;
         }
-        
+
         .header p {
             color: var(--text-secondary);
             font-size: 1rem;
         }
-        
+
         .upload-card {
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .upload-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .upload-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 102, 255, 0.2);
+        }
+
+        .upload-card:hover::before {
+            transform: scaleX(1);
+        }
+
         .drop-zone {
-            border: 2px dashed var(--dark-border);
-            border-radius: 12px;
-            padding: 2rem 1.5rem;
+            border: 3px dashed var(--dark-border);
+            border-radius: 16px;
+            padding: 3rem 2rem;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             background: rgba(0, 102, 255, 0.03);
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .drop-zone::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 102, 255, 0.1) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.6s ease;
+        }
+
         .drop-zone:hover,
         .drop-zone.dragover {
             border-color: var(--primary-blue);
-            background: rgba(0, 102, 255, 0.08);
-            box-shadow: 0 0 30px rgba(0, 102, 255, 0.2);
+            background: rgba(0, 102, 255, 0.12);
+            box-shadow: 0 0 40px rgba(0, 102, 255, 0.3);
+            transform: scale(1.02);
         }
-        
+
+        .drop-zone:hover::before,
+        .drop-zone.dragover::before {
+            transform: scale(1);
+        }
+
         .drop-zone i {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             color: var(--primary-blue);
-            margin-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            animation: bounceIcon 2s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
         }
-        
+
+        @keyframes bounceIcon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
         .drop-zone h4 {
             color: var(--text-primary);
             margin-bottom: 0.25rem;
             font-size: 1.1rem;
             font-weight: 600;
         }
-        
+
         .drop-zone p {
             color: var(--text-secondary);
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
-        
+
         .btn-primary-custom {
-            background: var(--primary-blue);
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-blue-light));
             border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
             color: white;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
         }
-        
+
+        .btn-primary-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
         .btn-primary-custom:hover {
-            background: var(--primary-blue-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 25px rgba(0, 102, 255, 0.4);
+            background: linear-gradient(135deg, var(--primary-blue-hover), var(--primary-blue));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5);
             color: white;
         }
-        
-        .btn-success-custom {
-            background: var(--success-color);
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            color: #000;
-            transition: all 0.3s ease;
+
+        .btn-primary-custom:hover::before {
+            left: 100%;
         }
-        
+
+        .btn-primary-custom:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        .btn-primary-custom:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        .btn-success-custom {
+            background: linear-gradient(135deg, var(--success-color), #00a86b);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            color: #000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 204, 136, 0.3);
+        }
+
+        .btn-success-custom:hover {
+            background: linear-gradient(135deg, #00a86b, var(--success-color));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 204, 136, 0.5);
+            color: #000;
+        }
+
         .btn-success-custom:hover {
             background: #00e699;
             transform: translateY(-2px);
             box-shadow: 0 5px 25px rgba(0, 204, 136, 0.4);
             color: #000;
         }
-        
+
         .btn-outline-secondary {
             border: 1px solid var(--dark-border);
             color: var(--text-secondary);
@@ -164,13 +400,13 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        
+
         .btn-outline-secondary:hover {
             border-color: var(--primary-blue);
             color: var(--primary-blue);
             background: rgba(0, 102, 255, 0.1);
         }
-        
+
         .btn-outline-primary {
             border: 1px solid var(--primary-blue);
             color: var(--primary-blue);
@@ -180,19 +416,19 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        
+
         .btn-outline-primary:hover {
             background: var(--primary-blue);
             color: white;
         }
-        
+
         .preview-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 1rem;
             margin-top: 1.25rem;
         }
-        
+
         .preview-item {
             position: relative;
             border-radius: 10px;
@@ -201,18 +437,18 @@
             background: var(--dark-card-hover);
             transition: all 0.3s ease;
         }
-        
+
         .preview-item:hover {
             border-color: var(--primary-blue);
             box-shadow: 0 5px 20px rgba(0, 102, 255, 0.2);
         }
-        
+
         .preview-item img {
             width: 100%;
             height: 120px;
             object-fit: cover;
         }
-        
+
         .preview-item .remove-btn {
             position: absolute;
             top: 5px;
@@ -230,11 +466,11 @@
             transition: transform 0.2s;
             font-size: 0.8rem;
         }
-        
+
         .preview-item .remove-btn:hover {
             transform: scale(1.1);
         }
-        
+
         .preview-item .status-badge {
             position: absolute;
             bottom: 5px;
@@ -245,56 +481,56 @@
             font-weight: 600;
             text-transform: uppercase;
         }
-        
+
         .status-pending {
             background: var(--warning-color);
             color: #000;
         }
-        
+
         .status-processing {
             background: var(--primary-blue);
             color: white;
         }
-        
+
         .status-done {
             background: var(--success-color);
             color: #000;
         }
-        
+
         .status-error {
             background: var(--danger-color);
             color: white;
         }
-        
+
         .results-card {
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
             border-radius: 16px;
             padding: 1.5rem;
         }
-        
+
         .results-card h4 {
             color: var(--text-primary);
             margin-bottom: 1rem;
         }
-        
+
         .results-table {
             border-radius: 10px;
             overflow: hidden;
         }
-        
+
         .results-table thead {
             background: linear-gradient(135deg, var(--primary-blue) 0%, #0044aa 100%);
             color: white;
         }
-        
+
         .results-table th {
             font-weight: 600;
             padding: 0.75rem 1rem;
             border: none;
             font-size: 0.85rem;
         }
-        
+
         .results-table td {
             padding: 0.6rem 1rem;
             vertical-align: middle;
@@ -303,78 +539,206 @@
             border-bottom: 1px solid var(--dark-border);
             font-size: 0.9rem;
         }
-        
+
         .results-table tbody tr:hover td {
             background: var(--dark-card-hover);
         }
-        
+
         .results-table a {
             color: var(--primary-blue-light);
             text-decoration: none;
         }
-        
+
         .results-table a:hover {
             text-decoration: underline;
         }
-        
+
         .progress-container {
-            margin-top: 1.25rem;
-        }
-        
-        .progress-container span {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        .progress {
-            height: 8px;
-            border-radius: 10px;
+            margin-top: 2rem;
+            background: var(--dark-card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--dark-border);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: slideInScale 0.6s ease-out;
+            position: relative;
             overflow: hidden;
-            background: var(--dark-border);
         }
-        
+
+        .progress-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-blue), var(--primary-blue-light));
+            animation: progressGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressGlow {
+            0% { box-shadow: 0 0 5px rgba(0, 102, 255, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(0, 102, 255, 0.6); }
+        }
+
+        @keyframes slideInScale {
+            0% { 
+                opacity: 0; 
+                transform: translateY(20px) scale(0.95); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0) scale(1); 
+            }
+        }
+
+        .progress-container span {
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .progress {
+            height: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: rgba(0, 102, 255, 0.1);
+            margin-top: 1rem;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+        }
+
         .progress-bar {
-            background: linear-gradient(90deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
-            transition: width 0.5s ease;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-light) 100%);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 102, 255, 0.4);
         }
-        
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
         .stats-row {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
             flex-wrap: wrap;
         }
-        
+
         .stat-card {
             flex: 1;
-            min-width: 140px;
+            min-width: 180px;
             background: linear-gradient(135deg, var(--primary-blue) 0%, #0044aa 100%);
             color: white;
-            padding: 1rem;
-            border-radius: 10px;
+            padding: 1.5rem;
+            border-radius: 16px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.2);
         }
-        
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 102, 255, 0.3);
+            background: linear-gradient(135deg, #0044aa 0%, var(--primary-blue) 100%);
+        }
+
+        .stat-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-card::after {
+            content: '📊';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .stat-card:nth-child(2)::after {
+            content: '✅';
+        }
+
+        .stat-card:nth-child(3)::after {
+            content: '🎯';
+        }
+
         .stat-card h3 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.2rem;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            animation: numberPulse 3s ease-in-out infinite;
         }
-        
+
+        @keyframes numberPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
         .stat-card p {
             margin: 0;
             opacity: 0.9;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 0.75rem;
             flex-wrap: wrap;
             margin-top: 1.25rem;
         }
-        
+
         .confidence-badge {
             display: inline-block;
             padding: 0.2rem 0.5rem;
@@ -382,87 +746,287 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
+
         .confidence-high {
             background: rgba(0, 204, 136, 0.2);
             color: var(--success-color);
         }
-        
+
         .confidence-medium {
             background: rgba(255, 170, 0, 0.2);
             color: var(--warning-color);
         }
-        
+
         .confidence-low {
             background: rgba(255, 77, 77, 0.2);
             color: var(--danger-color);
         }
-        
+
         .spinner-border-sm {
             width: 1rem;
             height: 1rem;
         }
-        
+
         .toast {
             background: var(--dark-card);
             border: 1px solid var(--dark-border);
             color: var(--text-primary);
         }
-        
+
         .toast-header {
             background: var(--dark-card-hover);
             color: var(--text-primary);
             border-bottom: 1px solid var(--dark-border);
         }
-        
+
         .table-responsive {
             border-radius: 10px;
             border: 1px solid var(--dark-border);
         }
-        /* Scrollbar styling */
-        
-         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+
+        /* Enhanced hover effects and smooth transitions */
+        .upload-card,
+        .results-card,
+        .stat-card,
+        .preview-item {
+            will-change: transform, box-shadow;
         }
-        
-         ::-webkit-scrollbar-track {
+
+        .btn-primary-custom,
+        .btn-success-custom,
+        .btn-outline-secondary,
+        .btn-outline-primary {
+            position: relative;
+            overflow: hidden;
+            will-change: transform, box-shadow;
+        }
+
+        .btn-primary-custom:hover,
+        .btn-success-custom:hover {
+            animation: buttonGlow 0.6s ease-in-out;
+        }
+
+        @keyframes buttonGlow {
+            0% { box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(0, 102, 255, 0.6); }
+            100% { box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5); }
+        }
+
+        /* Loading pulse animation for processing states */
+        .processing-pulse {
+            animation: processingPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes processingPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(0, 102, 255, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 20px rgba(0, 102, 255, 0);
+            }
+        }
+
+        /* Enhanced card animations */
+        .card-entrance {
+            animation: cardEntrance 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(40px) scale(0.9);
+            }
+            60% {
+                opacity: 0.8;
+                transform: translateY(-5px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        ::-webkit-scrollbar-track {
             background: var(--dark-bg);
         }
-        
-         ::-webkit-scrollbar-thumb {
+
+        ::-webkit-scrollbar-thumb {
             background: var(--dark-border);
             border-radius: 4px;
         }
-        
-         ::-webkit-scrollbar-thumb:hover {
+
+        ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-blue);
         }
-        
+
         @media (max-width: 768px) {
             .main-container {
                 padding: 1rem;
+                margin: 0 0.5rem;
             }
+
             .header h1 {
-                font-size: 1.5rem;
+                font-size: 1.8rem;
+                margin-bottom: 0.5rem;
             }
-            .drop-zone {
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .upload-card {
                 padding: 1.5rem 1rem;
+                margin-bottom: 1.5rem;
             }
+
+            .drop-zone {
+                padding: 2rem 1rem;
+                max-width: 100%;
+            }
+
+            .drop-zone i {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .drop-zone h4 {
+                font-size: 1rem;
+            }
+
+            .drop-zone p {
+                font-size: 0.85rem;
+            }
+
+            .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .preview-item img {
+                height: 80px;
+            }
+
+            .stat-card {
+                min-width: 100%;
+                padding: 1.25rem;
+                margin-bottom: 1rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.8rem;
+            }
+
+            .btn-primary-custom,
+            .btn-success-custom,
+            .btn-outline-secondary,
+            .btn-outline-primary {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.9rem;
+                margin: 0.25rem;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .progress-container {
+                padding: 1.25rem 1rem;
+                margin-top: 1.5rem;
+            }
+
+            .results-card {
+                padding: 1.25rem 1rem;
+            }
+
+            .results-table {
+                font-size: 0.85rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.5rem 0.4rem;
+            }
+
+            .success-notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                padding: 15px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+
+            .upload-card {
+                padding: 1rem 0.75rem;
+            }
+
+            .drop-zone {
+                padding: 1.5rem 0.75rem;
+            }
+
             .drop-zone i {
                 font-size: 2rem;
             }
-            .preview-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+
+            .btn-primary-custom,
+            .btn-success-custom {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.85rem;
             }
+
             .stat-card {
-                min-width: 100%;
+                padding: 1rem;
+            }
+
+            .stat-card h3 {
+                font-size: 1.6rem;
+            }
+
+            .results-table {
+                font-size: 0.8rem;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 0.4rem 0.3rem;
+            }
+        }
+
+        /* Landscape tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .main-container {
+                padding: 1.25rem;
+            }
+
+            .preview-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .stat-card {
+                min-width: 200px;
             }
         }
     </style>
 </head>
 
 <body>
+    <!-- Floating Particles Animation -->
+    <div class="floating-particles" id="floatingParticles"></div>
+    
+    <!-- Animated Starfield -->
+    <div class="starfield" id="starfield"></div>
+    
+    <!-- Floating Geometric Shapes -->
+    <div class="floating-shapes" id="floatingShapes"></div>
+    
     <div class="main-container">
         <div class="header">
             <h1><i class="bi bi-card-text me-2"></i>Business Card OCR</h1>
@@ -577,6 +1141,221 @@
         let selectedFiles = [];
         let processedResults = [];
 
+        // Visual Enhancement Functions
+        function createFloatingParticles() {
+            const particleContainer = document.getElementById('floatingParticles');
+            if (!particleContainer) return;
+
+            // Create 20 particles
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random size between 4px and 12px
+                const size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // Random starting position
+                particle.style.left = Math.random() * 100 + '%';
+                
+                // Random animation duration between 10s and 20s
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                
+                // Random animation delay
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        function createStarfield() {
+            const starfieldContainer = document.getElementById('starfield');
+            if (!starfieldContainer) return;
+
+            // Create 50 twinkling stars
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Random size between 1px and 3px
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                // Random position
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                
+                // Random animation delay
+                star.style.animationDelay = Math.random() * 3 + 's';
+                
+                starfieldContainer.appendChild(star);
+            }
+        }
+
+        function createFloatingShapes() {
+            const shapesContainer = document.getElementById('floatingShapes');
+            if (!shapesContainer) return;
+
+            const shapes = ['triangle', 'square', 'circle'];
+            
+            // Create 15 floating geometric shapes
+            for (let i = 0; i < 15; i++) {
+                const shape = document.createElement('div');
+                const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+                shape.className = `shape ${shapeType}`;
+                
+                // Random starting position
+                shape.style.left = Math.random() * 100 + '%';
+                
+                // Random animation duration between 15s and 25s
+                shape.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                
+                // Random animation delay
+                shape.style.animationDelay = Math.random() * 10 + 's';
+                
+                shapesContainer.appendChild(shape);
+            }
+        }
+
+        function addButtonLoadingState(button, isLoading = true) {
+            if (isLoading) {
+                button.disabled = true;
+                button.style.position = 'relative';
+                button.style.color = 'transparent';
+                
+                // Add spinner
+                const spinner = document.createElement('div');
+                spinner.className = 'button-spinner';
+                spinner.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 20px;
+                    height: 20px;
+                    margin: -10px 0 0 -10px;
+                    border: 2px solid transparent;
+                    border-top-color: white;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                `;
+                button.appendChild(spinner);
+                
+                // Add spin animation if not exists
+                if (!document.querySelector('#spinKeyframes')) {
+                    const style = document.createElement('style');
+                    style.id = 'spinKeyframes';
+                    style.textContent = `
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            } else {
+                button.disabled = false;
+                button.style.color = '';
+                const spinner = button.querySelector('.button-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
+            }
+        }
+
+        function showSuccessNotification(message, duration = 3000) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 30px;
+                right: 30px;
+                background: linear-gradient(135deg, var(--success-color), #00a86b);
+                color: white;
+                padding: 20px 25px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 204, 136, 0.3);
+                z-index: 9999;
+                font-weight: 600;
+                border-left: 4px solid rgba(255, 255, 255, 0.3);
+                backdrop-filter: blur(10px);
+                transform: translateX(400px);
+                opacity: 0;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                max-width: 350px;
+            `;
+            notification.innerHTML = `
+                <span style="display: inline-block; margin-right: 10px; font-size: 1.2em;">✨</span>
+                ${message}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 100);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(400px)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 400);
+            }, duration);
+        }
+
+        function animateStatCard(cardElement, newValue) {
+            const numberElement = cardElement.querySelector('h3');
+            if (!numberElement) return;
+            
+            // Add pop animation
+            cardElement.style.transform = 'scale(1.1)';
+            cardElement.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            setTimeout(() => {
+                cardElement.style.transform = 'scale(1)';
+                numberElement.textContent = newValue;
+            }, 150);
+        }
+
+        // Initialize visual enhancements when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create all animated background elements
+            createFloatingParticles();
+            createStarfield();
+            createFloatingShapes();
+            
+            // Add entrance animations to main elements
+            const elements = document.querySelectorAll('.upload-card, .results-card');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    el.classList.add('card-entrance');
+                }, index * 200);
+            });
+            
+            // Add processing pulse to upload card when files are being processed
+            const uploadCard = document.querySelector('.upload-card');
+            if (uploadCard) {
+                // Add subtle hover enhancement
+                uploadCard.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-6px)';
+                });
+                
+                uploadCard.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(-4px)';
+                });
+            }
+        });
+
         // Drop Zone Events
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -661,18 +1440,42 @@
         async function processAllCards() {
             if (selectedFiles.length === 0) return;
 
+            console.log('[DEBUG] processAllCards started with', selectedFiles.length, 'files');
+
             const progressContainer = document.getElementById('progressContainer');
             const progressBar = document.getElementById('progressBar');
             const progressText = document.getElementById('progressText');
             const progressPercent = document.getElementById('progressPercent');
             const processBtn = document.getElementById('processBtn');
 
+            // Enhanced visual feedback
             progressContainer.style.display = 'block';
-            processBtn.disabled = true;
-            processBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+            addButtonLoadingState(processBtn, true);
+            
+            // Add processing pulse to upload card
+            const uploadCardElement = document.querySelector('.upload-card');
+            if (uploadCardElement) {
+                uploadCardElement.classList.add('processing-pulse');
+            }
+            
+            // Add pulsing effect to progress container
+            progressContainer.style.animation = 'slideInScale 0.6s ease-out';
 
             processedResults = [];
             let processed = 0;
+            
+            // Show results section immediately with animation
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            resultsSection.style.opacity = '0';
+            resultsSection.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                resultsSection.style.transition = 'all 0.6s ease';
+                resultsSection.style.opacity = '1';
+                resultsSection.style.transform = 'translateY(0)';
+            }, 100);
+            
+            updateStats(); // Initialize with 0 values
 
             for (let i = 0; i < selectedFiles.length; i++) {
                 const item = selectedFiles[i];
@@ -691,13 +1494,65 @@
                     });
 
                     const result = await response.json();
+                    console.log('=== API RESPONSE ===');
+                    console.log('Full response:', result);
+                    console.log('result.success:', result.success);
+                    console.log('result.data:', result.data);
+                    if (result.data) {
+                        console.log('result.data.contact_data:', result.data.contact_data);
+                        console.log('Contact data keys:', result.data.contact_data ? Object.keys(result.data.contact_data) : 'null');
+                    }
+                    console.log('=================');
 
-                    if (result.success && result.data) {
+                    if (result.success) {
                         item.status = 'done';
+
+                        // Defensive handling: support multiple backend response shapes
+                        let contactData = {};
+
+                        if (result.data && result.data.contact_data) {
+                            contactData = result.data.contact_data;
+                            console.log('[INFO] Found contact_data at result.data.contact_data');
+                        } else if (result.contact_data) {
+                            contactData = result.contact_data;
+                            console.log('[INFO] Found contact_data at result.contact_data');
+                        } else if (result.data && Array.isArray(result.data.results) && result.data.results.length > 0 && result.data.results[0].contact_data) {
+                            contactData = result.data.results[0].contact_data;
+                            console.log('[INFO] Found contact_data in result.data.results[0].contact_data (batch)');
+                        } else {
+                            console.warn('[WARN] No contact_data found in response, using empty object');
+                        }
+
+                        // Normalize phone to array when present as string
+                        if (contactData.phone && !Array.isArray(contactData.phone)) {
+                            contactData.phone = [contactData.phone];
+                        }
+
+                        // Ensure confidence_score exists; fall back to ocr_confidence if available
+                        if (
+                            (contactData.confidence_score === undefined || contactData.confidence_score === null) &&
+                            result.data &&
+                            typeof result.data.ocr_confidence === 'number'
+                        ) {
+                            contactData.confidence_score = result.data.ocr_confidence;
+                        }
+
+                        console.log('Spreading:', contactData);
+                        
+                        // Extract new enrichment data
+                        const fieldConfidence = result.data?.field_confidence || {};
+                        const companyEnrichment = result.data?.company_enrichment || {};
+                        const processingTime = result.data?.processing_time_ms || 0;
+                        
                         processedResults.push({
                             filename: item.file.name,
-                            ...result.data.contact_data
+                            ...contactData,
+                            field_confidence: fieldConfidence,
+                            company_enrichment: companyEnrichment,
+                            processing_time_ms: processingTime,
+                            _raw_result: result
                         });
+                        console.log('Added to processedResults:', processedResults[processedResults.length - 1]);
                     } else {
                         item.status = 'error';
                         processedResults.push({
@@ -718,58 +1573,147 @@
                 progressBar.style.width = percent + '%';
                 progressPercent.textContent = percent + '%';
                 updatePreviewGrid();
+                
+                // Enhanced real-time updates with animations
+                updateResultsTable();
+                updateStats();
+                
+                // Show enhanced success notification for each card
+                if (processedResults.length > 0) {
+                    const latestResult = processedResults[processedResults.length - 1];
+                    if (!latestResult.error) {
+                        showSuccessNotification(`✨ Card ${i + 1}: ${latestResult.name || latestResult.filename || 'Business card'} processed successfully!`, 2000);
+                    }
+                }
             }
 
-            progressText.textContent = 'Processing complete!';
+            progressText.textContent = 'Processing complete! ✨';
+            addButtonLoadingState(processBtn, false);
             processBtn.innerHTML = '<i class="bi bi-cpu me-2"></i>Process All Cards';
-            processBtn.disabled = false;
+            
+            // Remove processing pulse
+            const uploadCardEl = document.querySelector('.upload-card');
+            if (uploadCardEl) {
+                uploadCardEl.classList.remove('processing-pulse');
+            }
 
-            displayResults();
-            showToast('Success', `Processed ${selectedFiles.length} business cards!`, 'success');
+            console.log('[DEBUG] All processing complete with', processedResults.length, 'results');
+            
+            // Final celebration notification
+            setTimeout(() => {
+                showSuccessNotification(`🎉 All ${selectedFiles.length} business cards processed successfully!`, 4000);
+            }, 500);
         }
 
-        function displayResults() {
-            const resultsSection = document.getElementById('resultsSection');
+        function updateResultsTable() {
             const resultsBody = document.getElementById('resultsBody');
-
             resultsBody.innerHTML = '';
 
-            let successCount = 0;
-            let totalConfidence = 0;
-
             processedResults.forEach((result, index) => {
-                        if (!result.error) {
-                            successCount++;
-                            totalConfidence += result.confidence_score || 0;
-                        }
+                const confidence =
+                    typeof result.confidence_score === 'number'
+                        ? result.confidence_score
+                        : 0;
+                const confidenceClass = confidence >= 0.7 ? 'high' : confidence >= 0.4 ? 'medium' : 'low';
 
-                        const confidence = result.confidence_score || 0;
-                        const confidenceClass = confidence >= 0.7 ? 'high' : confidence >= 0.4 ? 'medium' : 'low';
+                const row = document.createElement('tr');
 
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
+                // Smart name fallback: use first_name > full name > company > email
+                let nameDisplay = '-';
+
+                if (result.first_name) {
+                    nameDisplay = result.first_name;
+                    if (result.last_name) {
+                        nameDisplay += ' ' + result.last_name;
+                    }
+                } else if (result.name) {
+                    nameDisplay = result.name;
+                } else if (result.email) {
+                    nameDisplay = result.email.split('@')[0];
+                }
+
+                const emailDisplay = result.email ? `<a href="mailto:${result.email}">${result.email}</a>` : '-';
+                const phoneDisplay = result.phone ? (Array.isArray(result.phone) ? result.phone.join(', ') : result.phone) : '-';
+
+                const confPercent = (confidence * 100).toFixed(0);
+
+                // Add a subtle animation for new rows
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(10px)';
+                row.style.transition = 'all 0.3s ease';
+
+                // Company logo from enrichment
+                const logoUrl = result.company_logo || result.company_enrichment?.logo_url;
+                const companyDisplay = logoUrl 
+                    ? `<span class="d-flex align-items-center gap-2"><img src="${logoUrl}" alt="" style="width:20px;height:20px;border-radius:4px;object-fit:contain;background:#fff;" onerror="this.style.display='none'"><span>${result.company || '-'}</span></span>`
+                    : (result.company || '-');
+                
+                // LinkedIn link if available
+                const linkedinUrl = result.linkedin || result.company_enrichment?.linkedin_url;
+                const linkedinBadge = linkedinUrl 
+                    ? `<a href="${linkedinUrl}" target="_blank" class="text-primary ms-2" title="LinkedIn"><i class="bi bi-linkedin"></i></a>` 
+                    : '';
+                
+                // Per-field confidence indicator
+                const fieldConf = result.field_confidence || {};
+                const emailConf = fieldConf.email ? `<span class="badge bg-${fieldConf.email >= 0.8 ? 'success' : fieldConf.email >= 0.5 ? 'warning' : 'danger'} ms-1" style="font-size:0.65rem">${Math.round(fieldConf.email*100)}%</span>` : '';
+                
+                row.innerHTML = `
                     <td>${index + 1}</td>
-                    <td><strong>${result.name || '-'}</strong></td>
+                    <td><strong>${nameDisplay}</strong>${linkedinBadge}</td>
                     <td>${result.title || '-'}</td>
-                    <td>${result.company || '-'}</td>
-                    <td>${result.email ? `<a href="mailto:${result.email}">${result.email}</a>` : '-'}</td>
-                    <td>${result.phone ? result.phone.join(', ') : '-'}</td>
+                    <td>${companyDisplay}</td>
+                    <td>${emailDisplay}${emailConf}</td>
+                    <td>${phoneDisplay}</td>
                     <td>
-                        <span class="confidence-badge confidence-${confidenceClass}">
-                            ${(confidence * 100).toFixed(0)}%
+                        <span class="confidence-badge confidence-${confidenceClass}" title="Per-field: Name ${Math.round((fieldConf.name||0)*100)}%, Email ${Math.round((fieldConf.email||0)*100)}%, Phone ${Math.round((fieldConf.phone||0)*100)}%">
+                            ${confPercent}%
                         </span>
                     </td>
                 `;
+                
                 resultsBody.appendChild(row);
+                
+                // Animate in the new row
+                setTimeout(() => {
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 50);
+            });
+        }
+
+        function updateStats() {
+            let successCount = 0;
+            let totalConfidence = 0;
+
+            processedResults.forEach((result) => {
+                if (!result.error) {
+                    successCount++;
+                    if (typeof result.confidence_score === 'number') {
+                        totalConfidence += result.confidence_score;
+                    }
+                }
             });
 
-            // Update stats
+            const avgConfidence = successCount > 0 ? (totalConfidence / successCount * 100).toFixed(0) : 0;
+
             document.getElementById('totalProcessed').textContent = processedResults.length;
             document.getElementById('successCount').textContent = successCount;
-            document.getElementById('avgConfidence').textContent =
-                successCount > 0 ? Math.round((totalConfidence / successCount) * 100) + '%' : '0%';
+            document.getElementById('avgConfidence').textContent = avgConfidence + '%';
+        }
 
+        function displayResults() {
+            console.log('[DEBUG] displayResults called');
+            console.log('[DEBUG] processedResults:', processedResults);
+            
+            const resultsSection = document.getElementById('resultsSection');
             resultsSection.style.display = 'block';
+            
+            updateResultsTable();
+            updateStats();
+            
+            console.log('[DEBUG] About to set display block on resultsSection');
+            console.log('[DEBUG] resultsSection display is now:', resultsSection.style.display);
             resultsSection.scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -786,13 +1730,14 @@
                 'Last Name': r.last_name || '',
                 'Title': r.title || '',
                 'Company': r.company || '',
+                'Industry': r.industry || r.company_enrichment?.industry || '',
                 'Email': r.email || '',
                 'Phone': r.phone ? r.phone.join(', ') : '',
                 'Website': r.website || '',
-                'LinkedIn': r.linkedin || '',
-                'Twitter': r.twitter || '',
-                'Address': r.address || '',
-                'Confidence': r.confidence_score ? (r.confidence_score * 100).toFixed(1) + '%' : ''
+                'LinkedIn': r.linkedin || r.company_enrichment?.linkedin_url || '',
+                'Company Logo': r.company_logo || r.company_enrichment?.logo_url || '',
+                'Confidence': r.confidence_score ? (r.confidence_score * 100).toFixed(1) + '%' : '',
+                'Processing Time (ms)': r.processing_time_ms || ''
             }));
 
             const ws = XLSX.utils.json_to_sheet(data);
@@ -817,7 +1762,7 @@
                 return;
             }
 
-            const headers = ['Name', 'First Name', 'Last Name', 'Title', 'Company', 'Email', 'Phone', 'Website', 'LinkedIn', 'Twitter', 'Address', 'Confidence'];
+            const headers = ['Name', 'First Name', 'Last Name', 'Title', 'Company', 'Industry', 'Email', 'Phone', 'Website', 'LinkedIn', 'Twitter', 'Address', 'Company Logo', 'Confidence'];
 
             const csvContent = [
                 headers.join(','),
@@ -827,12 +1772,14 @@
                     `"${r.last_name || ''}"`,
                     `"${r.title || ''}"`,
                     `"${r.company || ''}"`,
+                    `"${r.industry || r.company_enrichment?.industry || ''}"`,
                     `"${r.email || ''}"`,
                     `"${r.phone ? r.phone.join('; ') : ''}"`,
                     `"${r.website || ''}"`,
-                    `"${r.linkedin || ''}"`,
+                    `"${r.linkedin || r.company_enrichment?.linkedin_url || ''}"`,
                     `"${r.twitter || ''}"`,
                     `"${r.address || ''}"`,
+                    `"${r.company_logo || r.company_enrichment?.logo_url || ''}"`,
                     `"${r.confidence_score ? (r.confidence_score * 100).toFixed(1) + '%' : ''}"`
                 ].join(','))
             ].join('\n');

@@ -2,14 +2,19 @@
 Source package initialization for Business Card Processing API.
 """
 
-from .ocr import CardOCR
-from .parser import CardDataParser
-from .researcher import FreeLeadResearcher
+from .ocr import OCRExtractor
+from .parser import ContactParser
+from .researcher import ContactResearcher
 from .pipeline import CardResearchPipeline
+from .enrichment import CompanyEnricher, FieldConfidenceScorer, CompanyEnrichment, FieldConfidence
 
 __all__ = [
-    "CardOCR",
-    "CardDataParser", 
-    "FreeLeadResearcher",
-    "CardResearchPipeline"
+    "OCRExtractor",
+    "ContactParser", 
+    "ContactResearcher",
+    "CardResearchPipeline",
+    "CompanyEnricher",
+    "FieldConfidenceScorer",
+    "CompanyEnrichment",
+    "FieldConfidence"
 ]
